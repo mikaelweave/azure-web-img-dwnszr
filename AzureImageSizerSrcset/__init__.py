@@ -1,129 +1,121 @@
-import json, logging, os, re, io, json, PIL, time, random
+import json, logging, os, time, random, copy #json for writing srcset
 import azure.functions as func
-from PIL import Image
-from azure.storage.blob import BlockBlobService, PublicAccess, baseblobservice, ContentSettings
-from azure.common import AzureConflictHttpError
-
-# Debug locally http://localhost:7071/runtime/webhooks/EventGrid?functionName=AzureImageSizerSrcset
-# ngrok http -host-header=localhost 7071
+from .CloudImage import CloudImage
 
 def main(event: func.EventGridEvent):
 
-    #1. Figure out values from input
-    logging.info('Python AzureImageSizerSrcsetprocessed an event: %s', event.subject)
-    blob_url = event.get_json()['url']
-    blob_name = event.subject.split('/blobs/')[1]
-    parts = blob_name.split('.')
-    container_name = event.subject.split('/blobs/')[0].split('containers/')[1]
+    logging.info(f'Python AzureImageSizerSrcset processed an event: {event.subject}')
 
-    # 1.5 Some input checking
+    # Get inputs
+    container_name = event.subject.split('/blobs/')[0].split('containers/')[1]
+    blob_name = event.subject.split('/blobs/')[1]
+
+    # Check settings, filter non-applicable events
+    settings = Settings(os.environ)
+    if not_website_image(container_name, blob_name) return
+
+    # Load image from Azure
+    orig_stream = read_blob_to_stream(blob_name)
+    cloud_image = CloudImage(name=blob_name, stream=orig_stream)
+
+    # Filter list of widths to resize so we only downscale
+    resize_widths = filter(lambda w: w <= cloud_image.width(), settings.image_sizes)
+
+    # Resize images (down size only)
+    resized_images = [cloud_image.copy().resize(width) for width in resize_widths]
+
+    # Save resized streams to Azure
+    for image in resized_images:
+        save_stream_to_cloud(settings, container_name, image.name, image.stream)
+        save_stream_to_cloud(settings, container_name, image.webp_name, image.webp_stream)
+
+    save_image_metadata(settings, container_name, blob_name, resize_widths)
+
+class Settings:
+    def __init__(self, environ):
+        if "AzureWebJobsStorage" in environ
+            self.storage_connection_string = environ["AzureWebJobsStorage"]
+        else
+            raise Exception("AzureWebJobsStorage must be set to use this function")
+
+        if "ImageSizes" in environ
+            self.image_sizes = environ["ImageSizes"]
+        else
+            raise Exception("ImageSizes must be set to use this function")
+
+def not_website_image(container_name, blob_name):
     already_processed = re.compile(r'.*_[0-9]+w\.[a-zA-Z]+$')
-    if container_name.startswith("$") or container_name.startswith("azure") or container_name in ['function-releases', 'scm-releases']:
-        logging.info(f'Not processing blob {blob_name} in system container {container_name}')
-        return
+
+    if container_name != '$web':
+        logging.info(f'Not processing blob {blob_name} in ignored container {container_name}')
+        return False
+
     if already_processed.match(blob_name):
         logging.info(f'Blob {blob_name} in container {container_name} already processed')
-        return
+        return False
+
     if not blob_name.lower().endswith(('jpg', 'jpeg', 'png')):
         logging.info(f'Skipping non-image blob {blob_name} in container {container_name}')
-        return
+        return False
+    
+    return True
 
-    # 2. Read Blob file into a stream for us to use
+def read_blob_to_stream(settings, container_name, blob_name):
     try:
-        block_blob_service = BlockBlobService(connection_string=os.environ["AzureWebJobsStorage"])
+        block_blob_service = BlockBlobService(connection_string=settings.storage_connection_string)
         stream = io.BytesIO()
         block_blob_service.get_blob_to_stream(container_name, blob_name, stream=stream)
+        return stream
     except Exception as ex:
         logger.error(f'Error getting blob {blob_name}. {ex}')
         return
 
-    # 3. Open blob as image and LOOP
+def save_stream_to_cloud(settings, container_name, blob_name, stream):
     try:
-        image = Image.open(stream)
+        block_blob_service = BlockBlobService(connection_string=settings.storage_connection_string)
+        content_settings = ContentSettings(content_type=f'image/{blob_name.split('.')[-1]}')
+        block_blob_service.create_blob_from_stream(container_name, blob_name, stream=stream, content_settings=content_settings)
     except Exception as ex:
-        logger.error(f'Error opening image from stream. {ex}')
+        logger.error(f'Error getting blob {blob_name}. {ex}')
+        return
 
-    resized_images = {}
-    parts = blob_name.split('.')
-    pillow_image_type = parts[-1].upper().replace("JPG", "JPEG")
+def save_image_metadata(settings, container_name, orig_blob_name, widths):
+    # if there are no resized images do nothing
+    if size(resized_images) == 0 return
 
-    sizes = os.environ["ImageSizes"].split(',')
-    for sizeStr in sizes:
-        size = int(sizeStr.strip())
-        resized_path = f'{".".join(parts[:-1])}_{size}w.{parts[-1]}'
-        webp3_path = f'{".".join(parts[:-1])}_{size}w.webp'
-        jpeg2k_path = f'{".".join(parts[:-1])}_{size}w.jp2'
+    # Metadata blob lives next to image files
+    metadata_blob_name = re.sub(f'[^/]+$', 'srcsets.json', resized_images[0])
+    extension = orig_blob_name.split('.')[-1]
 
-        if image.width <= size:
-            continue
-
-        img = image.copy()
-        wpercent = (size / float(img.size[0]))
-        hsize = int((float(img.size[1]) * float(wpercent)))
-        img = img.resize((size, hsize), PIL.Image.ANTIALIAS)
-        
-        # Resize in same format
-        try:
-            resized_stream = io.BytesIO()
-            img.save(resized_stream, format=pillow_image_type)
-            resized_stream.seek(0)
-            content_settings = ContentSettings(content_type=f'image/{pillow_image_type.lower()}')
-            block_blob_service.create_blob_from_stream(container_name, resized_path, stream=resized_stream, content_settings=content_settings)
-            if parts[-1] in resized_images:
-                resized_images[parts[-1]].append(size)
-            else:
-                resized_images[parts[-1]] = [size]
-        except Exception as ex:
-            logger.error(f'Error converting {resized_path} to size {size}. {ex}')
-
-        # Resize in WEBP
-        try:
-            webp3_stream = io.BytesIO()
-            img.save(webp3_stream, format='webp', quality = 70)
-            webp3_stream.seek(0)
-            content_settings = ContentSettings(content_type='image/webp')
-            block_blob_service.create_blob_from_stream(container_name, webp3_path, stream=webp3_stream, content_settings=content_settings)
-            if "webp" in resized_images:
-                resized_images["webp"].append(size)
-            else:
-                resized_images["webp"] = [size]
-        except Exception as ex:
-            logger.error(f'Error converting {resized_path} to webp. {ex}')
-
-        """try:
-            img.save(jpeg2k_path, 'JPEG2000', quality_mode='dB', quality_layers=[38])
-            if "jp2" in resized_images:
-                resized_images["jp2"].append(size)
-            else:
-                resized_images["jp2"] = [size]
-        except Exception as ex:
-            print(f'Error converting {resized_path} to jpeg2k. {ex}')"""
-
-    srcset_path = (os.path.dirname(blob_name) + '/' + 'srcsets.json').lstrip('/')
-    if not block_blob_service.exists(container_name, srcset_path):
+    # Get blob service and create metablob if not exist
+    block_blob_service = BlockBlobService(connection_string=settings.storage_connection_string)
+    if not block_blob_service.exists(container_name, metadata_blob_name):
         content_settings = ContentSettings(content_type='application/json')
-        block_blob_service.create_blob_from_text(container_name, srcset_path, "{}", content_settings=content_settings)
+        block_blob_service.create_blob_from_text(container_name, metadata_blob_name, "{}", content_settings=content_settings)
 
-    def write_srcset():
-        try:
-            lease_id = block_blob_service.acquire_blob_lease(container_name, srcset_path, 15)
-            srcsets = block_blob_service.get_blob_to_text(container_name, srcset_path)
-
-            srcsets_json = json.loads(srcsets.content)
-            srcsets_json[f'{container_name}/{blob_name}'] = resized_images
-
-            block_blob_service.create_blob_from_text(container_name, srcset_path, json.dumps(srcsets_json), lease_id=lease_id)
-            block_blob_service.release_blob_lease(container_name, srcset_path, lease_id)
-            return True
-        except AzureConflictHttpError as ex:
-            return False;
-
-    # Try to write back to srcset file. 
-    # Since this is a file and not a db, add retry logic
+    # Retry logic for writing metadata. Useful with concurrent function executions
     try:
         while True:
-            if (write_srcset()):
+            if (write_metada_blob()):
                 break
             time.sleep (random.randint(1,3056) / 1000.0);
     except Exception as ex:
-        logger.error(f'Exception encountered writing back to srcset file. {ex}')
+        logger.error(f'Exception encountered writing back to metadata file. {ex}')
+
+    def write_metada_blob():
+        try:
+            # Get and convert existing metadata blob
+            lease_id = block_blob_service.acquire_blob_lease(container_name, metadata_blob_name, 15)
+            cloud_json_str = block_blob_service.get_blob_to_text(container_name, metadata_blob_name).content
+            cloud_json = json.loads(cloud_json_str)
+
+            # Append metadata for our image sizes
+            cloud_json[f'{container_name}/{blob_name}'] = {extension: widths, "webp": widths}
+
+            # Write metadata blob
+            block_blob_service.create_blob_from_text(container_name, srcset_path, json.dumps(cloud_json), lease_id=lease_id)
+            block_blob_service.release_blob_lease(container_name, srcset_path, lease_id)
+            
+            return True
+        except AzureConflictHttpError as ex:
+            return False;
