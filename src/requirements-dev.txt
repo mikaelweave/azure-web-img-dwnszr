@@ -1,0 +1,4 @@
+pytest==5.4.1
+pytest-mock==2.0.0
+setupext-janitor==1.1.2
+tox==3.14.6

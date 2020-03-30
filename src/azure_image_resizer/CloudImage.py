@@ -1,4 +1,6 @@
-import PIL, os, re, io, logging
+import os, re, io, logging
+from dataclasses import dataclass, field
+from PIL import Image
 
 @dataclass
 class CloudImage:
@@ -8,7 +10,7 @@ class CloudImage:
 
     # calculated properties
     extension: str = field(init=False)
-    image: PIL.Image = field(default=None)
+    image: Image = field(default=None)
 
     def __post_init__(self):
         self.extension = self.name.split('.')[-1]
@@ -21,14 +23,14 @@ class CloudImage:
         try:
             wpercent = (width / float(self.image.size[0]))
             hsize = int((float(self.image.size[1]) * float(wpercent)))
-            return new_image.resize((width, hsize), PIL.Image.ANTIALIAS)
+            return new_image.resize((width, hsize), Image.ANTIALIAS)
         except Exception as ex:
             raise Exception("Error resizing image {blob_name} in {container_name} to width {width}", ex)
 
-        self.name = f'{self.name.split('.')[:-1]}_{width}w.{self.extension}'
+        self.name = f'{self.name.split(".")[:-1]}_{width}w.{self.extension}'
         self.stream = self.__image_to_stream(self.image)
 
-    def width():
+    def width(self):
         return self.image.size[0]
         
     @property
@@ -41,13 +43,13 @@ class CloudImage:
 
     def __stream_to_image(self):
         try:
-            return PIL.Image.open(self.stream)
+            return Image.open(self.stream)
         except Exception as ex:
             logger.error(f'Error opening image {self.name} from stream.', ex)
 
-    def __image_to_stream(self, format=self.extension):
+    def __image_to_stream(self, format=None):
         stream = io.BytesIO()
-        if format == self.extension:
+        if format in [None, self.extension]:
             img.save(resized_stream, format=self.extension.upper().replace("JPG", "JPEG"))
         if format == 'webp':
             image.save(stream, format='webp', quality = 70)

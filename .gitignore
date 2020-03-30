@@ -38,6 +38,7 @@ env.bak/
 venv.bak/
 
 Pipfile
+.tox
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
