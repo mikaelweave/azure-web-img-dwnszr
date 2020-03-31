@@ -1,5 +1,5 @@
 import io, json, logging, random, re, time
-from azure.storage.blob import BlockBlobService, ContentSettings
+import azure.storage.blob as azblob
 from azure.common import AzureConflictHttpError
 
 
@@ -23,7 +23,7 @@ def not_website_image(container_name, blob_name):
 
 def read_blob_to_stream(settings, container_name, blob_name):
     try:
-        block_blob_service = BlockBlobService(connection_string=settings.storage_connection_string)
+        block_blob_service = azblob.BlockBlobService(connection_string=settings.storage_connection_string)
         stream = io.BytesIO()
         block_blob_service.get_blob_to_stream(container_name, blob_name, stream=stream)
         return stream
@@ -33,8 +33,8 @@ def read_blob_to_stream(settings, container_name, blob_name):
 
 def save_stream_to_cloud(settings, container_name, blob_name, stream):
     try:
-        block_blob_service = BlockBlobService(connection_string=settings.storage_connection_string)
-        content_settings = ContentSettings(content_type=f'image/{blob_name.split(".")[-1]}')
+        block_blob_service = azblob.BlockBlobService(connection_string=settings.storage_connection_string)
+        content_settings = azblob.ContentSettings(content_type=f'image/{blob_name.split(".")[-1]}')
         block_blob_service.create_blob_from_stream(container_name, blob_name, stream=stream, content_settings=content_settings)
     except Exception as ex:
         raise Exception(f'Error saving blob {blob_name} to stream.', ex)
@@ -49,9 +49,9 @@ def save_image_metadata(settings, container_name, orig_blob_name, widths):
     extension = orig_blob_name.split('.')[-1]
 
     # Get blob service and create metablob if not exist
-    block_blob_service = BlockBlobService(connection_string=settings.storage_connection_string)
+    block_blob_service = azblob.BlockBlobService(connection_string=settings.storage_connection_string)
     if not block_blob_service.exists(container_name, metadata_blob_name):
-        content_settings = ContentSettings(content_type='application/json')
+        content_settings = azblob.ContentSettings(content_type='application/json')
         block_blob_service.create_blob_from_text(container_name, metadata_blob_name, "{}", content_settings=content_settings)
 
     def write_metada_blob():
