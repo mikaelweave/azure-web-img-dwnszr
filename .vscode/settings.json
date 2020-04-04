@@ -4,5 +4,5 @@
     "azureFunctions.projectLanguage": "Python",
     "azureFunctions.projectRuntime": "~3",
     "debug.internalConsoleOptions": "neverOpen",
-    "python.pythonPath": "~/.local/share/virtualenvs/src-vR8-BOIg/bin/python"
+    "python.pythonPath": "/home/mikael/.local/share/virtualenvs/azure_image_resizer-P01NhdJk/bin/python"
 }

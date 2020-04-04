@@ -52,31 +52,26 @@ def save_image_metadata(settings, container_name, orig_blob_name, widths):
     block_blob_service = azblob.BlockBlobService(connection_string=settings.storage_connection_string)
     if not block_blob_service.exists(container_name, metadata_blob_name):
         content_settings = azblob.ContentSettings(content_type='application/json')
-        block_blob_service.create_blob_from_text(container_name, metadata_blob_name, "{}", content_settings=content_settings)
-
-    def write_metada_blob():
-        try:
-            # Get and convert existing metadata blob
-            lease_id = block_blob_service.acquire_blob_lease(container_name, metadata_blob_name, 15)
-            cloud_json_str = block_blob_service.get_blob_to_text(container_name, metadata_blob_name).content
-            cloud_json = json.loads(cloud_json_str)
-
-            # Append metadata for our image sizes
-            cloud_json[f'{container_name}/{orig_blob_name}'] = {extension: widths, "webp": widths}
-
-            # Write metadata blob
-            block_blob_service.create_blob_from_text(container_name, metadata_blob_name, json.dumps(cloud_json), lease_id=lease_id)
-            block_blob_service.release_blob_lease(container_name, metadata_blob_name, lease_id)
-
-            return True
-        except AzureConflictHttpError:
-            return False
+        block_blob_service.create_blob_from_text(container_name, metadata_blob_name, text='{}', content_settings=content_settings)
 
     # Retry logic for writing metadata. Useful with concurrent function executions
     try:
         while True:
-            if write_metada_blob():
+            try:
+                # Get and convert existing metadata blob
+                lease_id = block_blob_service.acquire_blob_lease(container_name, metadata_blob_name, 15)
+                cloud_json_str = block_blob_service.get_blob_to_text(container_name, metadata_blob_name).content
+                cloud_json = json.loads(cloud_json_str)
+
+                # Append metadata for our image sizes
+                cloud_json[f'{container_name}/{orig_blob_name}'] = {extension: widths, "webp": widths}
+
+                # Write metadata blob
+                block_blob_service.create_blob_from_text(container_name, metadata_blob_name, text=json.dumps(cloud_json), lease_id=lease_id)
+                block_blob_service.release_blob_lease(container_name, metadata_blob_name, lease_id=lease_id)
+
                 break
-            time.sleep(random.randint(1, 3056) / 1000.0)
+            except AzureConflictHttpError:
+                time.sleep(random.randint(1, 3056) / 1000.0)
     except Exception as ex:
         raise Exception(f'Exception encountered writing back to metadata file for blob {orig_blob_name}.', ex)
