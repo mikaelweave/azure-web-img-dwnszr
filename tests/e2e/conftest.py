@@ -18,7 +18,7 @@ def execute_process_report_error(command, ignore_error=False):
 @pytest.fixture(scope='session')
 def settings():
     '''Create azure resources and deploy function for e2e test'''
-    print("Starting creation of infra for E2E testing...")
+    print('Starting creation of infra for E2E testing...')
 
     # Load settingr from environment
     load_dotenv(find_dotenv())
@@ -28,6 +28,8 @@ def settings():
     location = os.getenv('LOCATION', 'westus2')
     storage_account_name = os.getenv('STORAGE_ACCOUNT_NAME', f'aise2e{rand}')
     function_app_name = os.getenv('FUNCTION_APP_NAME', f'aise2e{rand}')
+
+    print(f'Executing e2e test on resource group {resource_group_name} at location {location} with storage account {storage_account_name} and function app {function_app_name}')
 
     # Create resource group if it doesn't exist
     execute_process_report_error(f'az group create --name {resource_group_name} --location {location}')
