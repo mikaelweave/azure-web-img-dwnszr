@@ -20,7 +20,6 @@ project.lock.json
 /data
 .secrets
 appsettings.json
-local.settings.json
 
 node_modules
 dist
@@ -39,8 +38,15 @@ venv.bak/
 
 Pipfile
 .tox
+.pytest_cache/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Packaged azure function file
+azure-web-img-dwnszr.zip
+
+# Per workspace vscode settings
+.vscode/settings.json

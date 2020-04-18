@@ -18,12 +18,12 @@ def find_subpackages(package):
     return packages
 
 
-setuptools.setup(name="azure_image_resizer",
+setuptools.setup(name="src",
     version="0.1",
-    description="Azure Function image resizer with metadata file creation",
+    description="Azure Function image downsizer with metadata file creation for web images",
     url="",
     author="Mikael Weaver",
-    packages=find_subpackages("azure_image_resizer"),
+    packages=find_subpackages("src"),
     license='MIT',
     setup_requires=['setupext_janitor'],
     cmdclass=cmd_classes,

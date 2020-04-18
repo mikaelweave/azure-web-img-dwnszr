@@ -1,7 +1,7 @@
 import io
 from PIL import Image
 
-from azure_image_resizer.CloudImage import CloudImage
+from src.CloudImage import CloudImage
 
 
 # Helper to create in memory test image

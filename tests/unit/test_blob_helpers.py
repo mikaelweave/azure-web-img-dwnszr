@@ -2,31 +2,34 @@ import io, pytest
 from unittest.mock import MagicMock
 from azure.common import AzureConflictHttpError
 
-from azure_image_resizer.BlobHelpers import not_website_image, read_blob_to_stream, save_stream_to_cloud, save_image_metadata
-from azure_image_resizer.Settings import Settings
+from src.BlobHelpers import not_website_image, read_blob_to_stream, save_stream_to_cloud, save_image_metadata
+from src.Settings import Settings
 
 
 def setup_settings_for_test():
     test_env = {}
     test_env['AzureWebJobsStorage'] = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=test;AccountKey=test'
-    test_env['ImageSizes'] = [1, 2, 3]
+    test_env['ImageSizes'] = '1,2,3'
     return Settings(test_env)
 
 
 class NotWebsiteImageTestCase:
     def test_valid_blob(self):
-        assert not_website_image('$web', 'test.jpg')
-        assert not_website_image('$web', 'test.jpeg')
-        assert not_website_image('$web', 'test.png')
-        assert not_website_image('$web', 'test.JPG')
-        assert not_website_image('$web', 'test.JPEG')
-        assert not_website_image('$web', 'test.PNG')
+        settings = setup_settings_for_test()
+        assert not not_website_image(settings, '$web', 'test.jpg')
+        assert not not_website_image(settings, '$web', 'test.jpeg')
+        assert not not_website_image(settings, '$web', 'test.png')
+        assert not not_website_image(settings, '$web', 'test.JPG')
+        assert not not_website_image(settings, '$web', 'test.JPEG')
+        assert not not_website_image(settings, '$web', 'test.PNG')
 
     def test_invalid_continer(self):
-        assert not not_website_image('data', 'test.jpg')
+        settings = setup_settings_for_test()
+        assert not_website_image(settings, 'data', 'test.jpg')
 
     def test_already_processed(self):
-        assert not not_website_image('$web', 'test_100w.jpg')
+        settings = setup_settings_for_test()
+        assert not_website_image(settings, '$web', 'test_100w.jpg')
 
 
 class ReadBlobToStreamTestCase:
@@ -101,13 +104,13 @@ class SaveImageMetadataTestCase:
         spy = mocker.spy(mocked_blob_service.return_value, 'create_blob_from_text')
 
         # Act
-        save_image_metadata(settings, 'container_name', 'blob_name.jpg', [1])
+        save_image_metadata(settings, 'container_name', 'folder/blob_name.jpg', [1])
 
         # Assert
         assert spy.call_count == 2
         call_args = spy.call_args_list[0]
-        assert call_args.args[0] == 'container_name'
-        assert call_args.args[1] == 'srcsets.json'
+        assert call_args.args[0] == 'data'
+        assert call_args.args[1] == 'folder/srcsets.json'
         assert call_args.kwargs['text'] == '{}'
         assert call_args.kwargs['content_settings'].content_type == 'application/json'
 
@@ -128,9 +131,9 @@ class SaveImageMetadataTestCase:
 
         # Assert
         expected_text = '{"container_name/blob_name.jpg": {"jpg": [1], "webp": [1]}}'
-        create_blob_spy.assert_called_once_with('container_name', 'srcsets.json', text=expected_text, lease_id='m')
-        acquire_lease_spy.assert_called_once_with('container_name', 'srcsets.json', 15)
-        release_lease_spy.assert_called_once_with('container_name', 'srcsets.json', lease_id='m')
+        create_blob_spy.assert_called_once_with('data', 'srcsets.json', text=expected_text, lease_id='m')
+        acquire_lease_spy.assert_called_once_with('data', 'srcsets.json', 15)
+        release_lease_spy.assert_called_once_with('data', 'srcsets.json', lease_id='m')
 
     def test_retry(self, mocker):
         # Arrange
@@ -147,11 +150,11 @@ class SaveImageMetadataTestCase:
         save_image_metadata(settings, 'container_name', 'blob_name.jpg', settings.image_sizes)
 
         assert acquire_lease_spy.call_count == 2
-        assert acquire_lease_spy.call_args_list[0].args[0] == 'container_name'
+        assert acquire_lease_spy.call_args_list[0].args[0] == 'data'
         assert acquire_lease_spy.call_args_list[0].args[1] == 'srcsets.json'
-        assert acquire_lease_spy.call_args_list[1].args[0] == 'container_name'
+        assert acquire_lease_spy.call_args_list[1].args[0] == 'data'
         assert acquire_lease_spy.call_args_list[1].args[1] == 'srcsets.json'
-        release_lease_spy.assert_called_once_with('container_name', 'srcsets.json', lease_id=13)
+        release_lease_spy.assert_called_once_with('data', 'srcsets.json', lease_id=13)
 
     def test_catches_and_raises_exception(self, mocker):
         settings = setup_settings_for_test()

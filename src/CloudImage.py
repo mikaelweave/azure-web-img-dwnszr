@@ -18,7 +18,7 @@ class CloudImage:
         self.image = self.__stream_to_image()
 
     def downsize(self, width):
-        if self.image.width <= width:
+        if self.image.width <= int(width):
             return
 
         try:
