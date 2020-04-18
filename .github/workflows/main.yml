@@ -1,0 +1,34 @@
+name: CICD
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+
+    - name: Set Python 3.8
+      uses: actions/setup-python@v1.2.0
+      with:
+        python-version: 3.8
+
+    - name: Setup environment
+      run: |
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+
+    - name: Run linting check
+      run: tox -e "lint"
+    
+    - name: Run unit tests
+      run: tox -e "unit"
+    
+    - name: Run end to end
+      run: tox -e "e2e"
