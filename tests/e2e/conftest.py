@@ -1,5 +1,5 @@
 import os, pytest, random
-from subprocess import Popen, PIPE, STDOUT
+from subprocess import Popen, PIPE
 from dotenv import find_dotenv, load_dotenv
 
 from src.Settings import Settings
