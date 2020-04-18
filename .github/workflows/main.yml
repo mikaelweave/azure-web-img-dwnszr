@@ -30,7 +30,7 @@ jobs:
     - name: Run unit tests
       run: tox -e "unit"
     
-    - name: Run end to end
+    - name: Run end to end tests
       run: |
         az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" -t "$ARM_TENANT_ID"
         az account set --subscription "$ARM_SUBSCRIPTION_ID"
