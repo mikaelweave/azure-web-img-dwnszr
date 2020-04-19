@@ -63,6 +63,8 @@ def settings():
     # execute_process_report_error(f'az functionapp deployment slot create --name {function_app_name} --slot {data.function_app_slot}')
 
     # Create function app deployment from local zip
+    print(os.path.getsize('azure-web-img-dwnszr.zip'))
+    print(os.getcwd())
     execute_process_report_error(f'az functionapp deployment source config-zip --name {function_app_name} --resource-group {resource_group_name} --src azure-web-img-dwnszr.zip', True)
 
     # Set function settings
