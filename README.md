@@ -1,7 +1,6 @@
 # Azure Web Image Dwnszr
 
-
-## Overview
+![CI](https://github.com/mikaelweave/azure-web-img-dwnszr/workflows/CI/badge.svg?branch=master)
 
 Why another Serverless Image Resizer®? While writing a few static websites, I could not find any existing solution that met my requirements around image management. I need something that:
 - ⬇ Downsizes copies of images on upload and stores them (storage vs compute)
