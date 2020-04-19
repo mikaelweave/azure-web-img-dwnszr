@@ -47,6 +47,7 @@ jobs:
         ls
         az extension list
         az version
+        az eventgrid event-subscription create --help
         tox -e "e2e"
       env:
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
