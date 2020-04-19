@@ -51,19 +51,3 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
         RESOURCE_GROUP_NAME: ${{ secrets.E2E_RESOURCE_GROUP_NAME }}
-
-    - name: Create Release
-      id: create_release
-      if: contains(github.ref, "release")
-      uses: actions/create-release@latest
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        body: |
-          Changes in this Release
-          - First Change
-          - Second Change
-        draft: false
-        prerelease: false
