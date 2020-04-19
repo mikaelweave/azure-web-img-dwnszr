@@ -36,7 +36,7 @@ jobs:
         pip install  --target=".tmp/.python_packages/lib/site-packages"  -r requirements.txt
         cp -r src/* .tmp/azure-web-img-dwnszr/
         cd .tmp; zip -r ../azure-web-img-dwnszr.zip .*; cd ..
-        rm -rf .
+        rm -rf .tmp
         pwd
         ls
         
