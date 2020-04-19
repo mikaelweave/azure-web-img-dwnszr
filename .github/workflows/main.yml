@@ -46,6 +46,7 @@ jobs:
         pwd
         ls
         az extension list
+        az version
         tox -e "e2e"
       env:
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
@@ -54,9 +55,9 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
         RESOURCE_GROUP_NAME: ${{ secrets.E2E_RESOURCE_GROUP_NAME }}
 
-    - name: Upload function artifact
-      if: failure()
-      uses: actions/upload-artifact@v1.0.0
-      with:
-        name: azure-web-img-dwnszr.zip
-        path: azure-web-img-dwnszr.zip
+    #- name: Upload function artifact
+    #  if: failure()
+    #  uses: actions/upload-artifact@v1.0.0
+    #  with:
+    #    name: azure-web-img-dwnszr.zip
+    #    path: azure-web-img-dwnszr.zip
