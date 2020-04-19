@@ -10,12 +10,14 @@ def execute_process_report_error(command, ignore_error=False):
     stdout, stderr = process.communicate()
 
     if process.returncode != 0:
+        print('ERROR in execute_process_report_error')
+        print(f'Command: {command}')
+        print(f'Output: {stdout.decode("utf-8").rstrip()}')
+        print(f'Error: {stderr.decode("utf-8").rstrip()}')
         if ignore_error:
             print('Ignoring error encountered while executing')
-            print(f'Command: {command}')
-            print(f'Error: {stderr}')
         else:
-            raise f'Error executing command: {command}. Error: {stderr}'
+            raise f'Error executing command. Exiting.'
 
     return stdout.decode("utf-8").rstrip()
 
@@ -63,8 +65,6 @@ def settings():
     # execute_process_report_error(f'az functionapp deployment slot create --name {function_app_name} --slot {data.function_app_slot}')
 
     # Create function app deployment from local zip
-    print(os.path.getsize('azure-web-img-dwnszr.zip'))
-    print(os.getcwd())
     execute_process_report_error(f'az functionapp deployment source config-zip --name {function_app_name} --resource-group {resource_group_name} --src azure-web-img-dwnszr.zip', True)
 
     # Set function settings
