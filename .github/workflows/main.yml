@@ -43,8 +43,8 @@ jobs:
     - name: Upload function artifact
       uses: actions/upload-artifact@v1.0.0
       with:
-        name: azure-web-img-dwnsz.zip
-        path: azure-web-img-dwnsz.zip
+        name: azure-web-img-dwnszr.zip
+        path: azure-web-img-dwnszr.zip
             
     - name: Run end to end tests
       run: |
