@@ -37,20 +37,14 @@ jobs:
         cp -r src/* .tmp/azure-web-img-dwnszr/
         cd .tmp; zip -r ../azure-web-img-dwnszr.zip .*; cd ..
         rm -rf .tmp
-        pwd
-        ls
-        
-    - name: Upload function artifact
-      uses: actions/upload-artifact@v1.0.0
-      with:
-        name: azure-web-img-dwnszr.zip
-        path: azure-web-img-dwnszr.zip
-            
+
     - name: Run end to end tests
       run: |
         az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" -t "$ARM_TENANT_ID"
         az account set --subscription "$ARM_SUBSCRIPTION_ID"
         az extension add --n eventgrid
+        pwd
+        ls
         tox -e "e2e"
       env:
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
@@ -58,3 +52,10 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
         RESOURCE_GROUP_NAME: ${{ secrets.E2E_RESOURCE_GROUP_NAME }}
+
+    - name: Upload function artifact
+      if: failure()
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: azure-web-img-dwnszr.zip
+        path: azure-web-img-dwnszr.zip
