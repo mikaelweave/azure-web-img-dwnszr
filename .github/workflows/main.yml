@@ -37,7 +37,13 @@ jobs:
         cp -r src/* .tmp/azure-web-img-dwnszr/
         cd .tmp; zip -r ../azure-web-img-dwnszr.zip .*; cd ..
         rm -rf .tmp
-    
+        
+    - name: Upload function artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: azure-web-img-dwnsz.zip
+        path: azure-web-img-dwnsz.zip
+            
     - name: Run end to end tests
       run: |
         az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" -t "$ARM_TENANT_ID"
