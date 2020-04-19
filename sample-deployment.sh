@@ -30,10 +30,10 @@ az functionapp create --consumption-plan-location $LOCATION \
 
 # Package local version of function
 # TODO: Replace with pull of github release
-mkdir -p .tmp/azure-web-img-dwnsizr
+mkdir -p .tmp/azure-web-img-dwnszr
 cp -r host.json local.settings.json .tmp/
 pip install  --target=".tmp/.python_packages/lib/site-packages"  -r requirements.txt
-cp src/* .tmp/azure-web-img-dwnsizr/
+cp src/* .tmp/azure-web-img-dwnszr/
 cd .tmp; zip -r ../azure-web-img-dwnszr.zip .*; cd ..
 rm -rf .tmp
 

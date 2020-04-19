@@ -21,14 +21,22 @@ jobs:
 
     - name: Setup environment
       run: |
-        pip install -r requirements.txt
-        pip install -r requirements-dev.txt
+        pip install tox
 
     - name: Run linting check
       run: tox -e "lint"
     
     - name: Run unit tests
       run: tox -e "unit"
+
+    - name: Package function
+      run: |
+        mkdir -p .tmp/azure-web-img-dwnszr
+        cp -r host.json local.settings.json .tmp/
+        pip install  --target=".tmp/.python_packages/lib/site-packages"  -r requirements.txt
+        cp src/* .tmp/azure-web-img-dwnsizr/
+        cd .tmp; zip -r ../azure-web-img-dwnszr.zip .*; cd ..
+        rm -rf .tmp
     
     - name: Run end to end tests
       run: |

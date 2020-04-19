@@ -36,7 +36,7 @@ def settings():
 
     # Create storage account if it doesn't exist
     execute_process_report_error(f'az storage account create --resource-group {resource_group_name} --name {storage_account_name} --location {location}')
-    storage_connection_string = execute_process_report_error(f'az storage account show-connection-string --name {storage_account_name} --output tsv')
+    storage_connection_string = execute_process_report_error(f'az storage account show-connection-string --name {storage_account_name} --resource-group {resource_group_name} --output tsv')
 
     # Creating settings object
     settings = Settings({
@@ -58,17 +58,17 @@ def settings():
     # execute_process_report_error(f'az functionapp deployment slot create --name {function_app_name} --slot {data.function_app_slot}')
 
     # Create function app deployment from local zip
-    execute_process_report_error(f'az functionapp deployment source config-zip --name {function_app_name} --src azure_image_resizer.zip', True)
+    execute_process_report_error(f'az functionapp deployment source config-zip --name {function_app_name} --resource-group {resource_group_name} --src azure-web-img-dwnszr.zip', True)
 
     # Set function settings
-    execute_process_report_error(f'az functionapp config appsettings set --name {function_app_name} --settings "ImageSizes={",".join(map(str, settings.image_sizes))}"')
-    execute_process_report_error(f'az functionapp config appsettings set --name {function_app_name} --settings "ImageContainerName={settings.image_container_name}"')
-    execute_process_report_error(f'az functionapp config appsettings set --name {function_app_name} --settings "MetadataContainerName={settings.metadata_container_name}"')
+    execute_process_report_error(f'az functionapp config appsettings set --name {function_app_name} --resource-group {resource_group_name} --settings "ImageSizes={",".join(map(str, settings.image_sizes))}"')
+    execute_process_report_error(f'az functionapp config appsettings set --name {function_app_name} --resource-group {resource_group_name} --settings "ImageContainerName={settings.image_container_name}"')
+    execute_process_report_error(f'az functionapp config appsettings set --name {function_app_name} --resource-group {resource_group_name} --settings "MetadataContainerName={settings.metadata_container_name}"')
 
     # Create event trigger on image blob
-    function_app_id = execute_process_report_error(f'az functionapp show --name {function_app_name} --output tsv --query "id"')
-    function_id = f'{function_app_id}/functions/azure_image_resizer'
-    storage_account_id = execute_process_report_error(f'az storage account show --name {storage_account_name} --output tsv --query "id"')
+    function_app_id = execute_process_report_error(f'az functionapp show --name {function_app_name} --resource-group {resource_group_name} --output tsv --query "id"')
+    function_id = f'{function_app_id}/functions/azure-web-img-dwnszr'
+    storage_account_id = execute_process_report_error(f'az storage account show --name {storage_account_name} --resource-group {resource_group_name} --output tsv --query "id"')
     execute_process_report_error(f'az eventgrid event-subscription create --name e2etest{rand} --source-resource-id {storage_account_id} --endpoint-type azurefunction --endpoint {function_id} --included-event-types "Microsoft.Storage.BlobCreated" --advanced-filter subject StringContains "{settings.image_container_name}"')
 
     # Tests will run here, passing settings to test cases (data)
