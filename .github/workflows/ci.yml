@@ -1,4 +1,4 @@
-name: CICD
+name: CI
 
 on:
   push:
@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
     - name: Set Python 3.8
@@ -37,20 +36,14 @@ jobs:
         cp -r src/* .tmp/azure-web-img-dwnszr/
         cd .tmp; zip -r ../azure-web-img-dwnszr.zip .*; cd ..
         rm -rf .tmp
-        pwd
-        ls
-        
-    - name: Upload function artifact
-      uses: actions/upload-artifact@v1.0.0
-      with:
-        name: azure-web-img-dwnszr.zip
-        path: azure-web-img-dwnszr.zip
-            
+
     - name: Run end to end tests
       run: |
         az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" -t "$ARM_TENANT_ID"
         az account set --subscription "$ARM_SUBSCRIPTION_ID"
+        rm -rf $AZURE_EXTENSION_DIR/eventgrid
         az extension add --n eventgrid
+        exec -l $SHELL
         tox -e "e2e"
       env:
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
@@ -58,3 +51,19 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
         RESOURCE_GROUP_NAME: ${{ secrets.E2E_RESOURCE_GROUP_NAME }}
+
+    - name: Create Release
+      id: create_release
+      if: contains(github.ref, "release")
+      uses: actions/create-release@latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          Changes in this Release
+          - First Change
+          - Second Change
+        draft: false
+        prerelease: false

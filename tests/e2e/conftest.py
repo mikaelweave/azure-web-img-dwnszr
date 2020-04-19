@@ -9,8 +9,15 @@ def execute_process_report_error(command, ignore_error=False):
     process = Popen(command, stdout=PIPE, stderr=PIPE, shell=True)
     stdout, stderr = process.communicate()
 
-    if process.returncode != 0 and not ignore_error:
-        raise f'Error executing command: {command}. Error: {stderr}'
+    if process.returncode != 0:
+        print('ERROR in execute_process_report_error')
+        print(f'Command: {command}')
+        print(f'Output: {stdout.decode("utf-8").rstrip()}')
+        print(f'Error: {stderr.decode("utf-8").rstrip()}')
+        if ignore_error:
+            print('Ignoring error encountered while executing')
+        else:
+            raise f'Error executing command. Exiting.'
 
     return stdout.decode("utf-8").rstrip()
 
