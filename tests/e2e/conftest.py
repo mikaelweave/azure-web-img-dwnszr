@@ -10,7 +10,7 @@ def execute_process_report_error(command, ignore_error=False):
     stdout, stderr = process.communicate()
 
     if process.returncode != 0 and not ignore_error:
-        raise f'Error executing command: {command}. Error: {stderr.decode("utf-8").rstrip()}'
+        raise f'Error executing command: {command}. Error: {stderr}'
 
     return stdout.decode("utf-8").rstrip()
 
