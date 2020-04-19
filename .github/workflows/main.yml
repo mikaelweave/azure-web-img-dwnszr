@@ -45,6 +45,7 @@ jobs:
         echo $AZURE_EXTENSION_DIR
         rm -rf $AZURE_EXTENSION_DIR/eventgrid
         az extension add --n eventgrid
+        exec -l $SHELL
         pwd
         ls
         az extension list
