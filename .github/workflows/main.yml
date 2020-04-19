@@ -42,6 +42,8 @@ jobs:
       run: |
         az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" -t "$ARM_TENANT_ID"
         az account set --subscription "$ARM_SUBSCRIPTION_ID"
+        echo $AZURE_EXTENSION_DIR
+        rm -rf $AZURE_EXTENSION_DIR/eventgrid
         az extension add --n eventgrid
         pwd
         ls
