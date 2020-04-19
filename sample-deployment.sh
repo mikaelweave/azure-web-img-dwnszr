@@ -28,14 +28,8 @@ az functionapp create --consumption-plan-location $LOCATION \
     --name $RESOURCE_NAME --storage-account $RESOURCE_NAME \
     --os-type linux
 
-# Package local version of function
-# TODO: Replace with pull of github release
-mkdir -p .tmp/azure-web-img-dwnszr
-cp -r host.json local.settings.json .tmp/
-pip install  --target=".tmp/.python_packages/lib/site-packages"  -r requirements.txt
-cp src/* .tmp/azure-web-img-dwnszr/
-cd .tmp; zip -r ../azure-web-img-dwnszr.zip .*; cd ..
-rm -rf .tmp
+# Get latest release
+curl -s https://api.github.com/repos/mikaelweave/azure-web-img-dwnszr/releases/latest | jq '.assets[0].browser_download_url' | xargs wget -O azure-web-img-dwnszr.zip
 
 # Deploy function 
 # Will currently throw error but deploy successfully - https://github.com/Azure/azure-cli/issues/12513
