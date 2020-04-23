@@ -11,7 +11,7 @@ class Settings:
         else:
             raise Exception('ImageSizes must be set to use this function')
 
-        self.__image_container_name = '$web'
+        self.__image_container_name = ''
         if 'ImageContainerName' in environ:
             self.__image_container_name = environ['ImageContainerName']
 

@@ -9,6 +9,7 @@ from src.Settings import Settings
 def setup_settings_for_test():
     test_env = {}
     test_env['AzureWebJobsStorage'] = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=test;AccountKey=test'
+    test_env['ImageContainerName'] = '$web'
     test_env['ImageSizes'] = '1,2,3'
     return Settings(test_env)
 

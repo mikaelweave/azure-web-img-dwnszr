@@ -6,7 +6,7 @@ from azure.common import AzureConflictHttpError
 def not_website_image(settings, container_name, blob_name):
     already_processed = re.compile(r'.*_[0-9]+w\.[a-zA-Z]+$')
 
-    if container_name != settings.image_container_name:
+    if container_name != settings.image_container_name and len(settings.image_container_name) > 0:
         logging.info(f'Not processing blob {blob_name} in ignored container {container_name}')
         return True
 
