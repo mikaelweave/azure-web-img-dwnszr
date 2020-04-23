@@ -111,7 +111,7 @@ class SaveImageMetadataTestCase:
         assert spy.call_count == 2
         call_args = spy.call_args_list[0]
         assert call_args.args[0] == 'data'
-        assert call_args.args[1] == 'folder/srcsets.json'
+        assert call_args.args[1] == 'srcsets.json'
         assert call_args.kwargs['text'] == '{}'
         assert call_args.kwargs['content_settings'].content_type == 'application/json'
 

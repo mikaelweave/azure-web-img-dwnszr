@@ -45,12 +45,17 @@ def save_image_metadata(settings, image_container_name, image_blob_name, widths)
     if len(widths) == 0: return
 
     # Metadata blob structure should match image blob structure
-    metadata_blob_name = re.sub(f'[^/]+$', 'srcsets.json', image_blob_name)
+    metadata_blob_name = 'srcsets.json'
     extension = image_blob_name.split('.')[-1]
 
-    # Get blob service and create metablob if not exist
     block_blob_service = azblob.BlockBlobService(connection_string=settings.storage_connection_string)
-    if not block_blob_service.exists(image_container_name, metadata_blob_name):
+
+    # Create metadata container if it does not exits 
+    if not block_blob_service.exists(settings.metadata_container_name):
+        block_blob_service.create_container(settings.metadata_container_name)
+
+    # create metablob if not exist
+    if not block_blob_service.exists(settings.metadata_container_name, metadata_blob_name):
         content_settings = azblob.ContentSettings(content_type='application/json')
         block_blob_service.create_blob_from_text(settings.metadata_container_name, metadata_blob_name, text='{}', content_settings=content_settings)
 
