@@ -47,7 +47,7 @@ def settings():
 
     # Creating settings object
     settings = Settings({
-        'AzureWebJobsStorage': storage_connection_string,
+        'StorageAccountConnectionString': storage_connection_string,
         'ImageSizes': '480,768,1200,1400,1700,2000,2436',
         'ImageContainerName': f'image{rand}',
         'MetadataContainerName': f'metadata{rand}'
@@ -69,6 +69,7 @@ def settings():
 
     # Set function settings
     execute_process_report_error(f'az functionapp config appsettings set --name {function_app_name} --resource-group {resource_group_name} --settings "ImageSizes={",".join(map(str, settings.image_sizes))}"')
+    execute_process_report_error(f'az functionapp config appsettings set --name {function_app_name} --resource-group {resource_group_name} --settings "StorageAccountConnectionString={settings.storage_connection_string}"')
     execute_process_report_error(f'az functionapp config appsettings set --name {function_app_name} --resource-group {resource_group_name} --settings "ImageContainerName={settings.image_container_name}"')
     execute_process_report_error(f'az functionapp config appsettings set --name {function_app_name} --resource-group {resource_group_name} --settings "MetadataContainerName={settings.metadata_container_name}"')
 

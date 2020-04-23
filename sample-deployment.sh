@@ -39,6 +39,8 @@ az functionapp deployment source config-zip --name $RESOURCE_NAME \
 # Setup settings for function
 az functionapp config appsettings set --name $RESOURCE_NAME \
     --settings "ImageSizes=480,768,1200,1400,1700,2000,2436"
+az functionapp config appsettings set --name $RESOURCE_NAME \
+    --settings "StorageAccountConnectionString=$(az storage account show-connection-string --name RESOURCE_NAME --output tsv)"
 
 # Create blob trigger
 # May require preview version of the exenthub extension

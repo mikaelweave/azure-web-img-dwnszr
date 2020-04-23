@@ -1,10 +1,10 @@
 class Settings:
 
     def __init__(self, environ):
-        if 'AzureWebJobsStorage' in environ:
-            self.__storage_connection_string = environ['AzureWebJobsStorage']
+        if 'StorageAccountConnectionString' in environ:
+            self.__storage_connection_string = environ['StorageAccountConnectionString']
         else:
-            raise Exception('AzureWebJobsStorage must be set to use this function')
+            raise Exception('StorageAccountConnectionString must be set to use this function')
 
         if 'ImageSizes' in environ:
             self.__image_sizes = [int(i.strip()) for i in environ['ImageSizes'].split(',')]

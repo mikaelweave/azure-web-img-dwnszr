@@ -3,7 +3,7 @@
 ## Debugging
 
 **Prerequisites**
-- Ensure you have `AzureWebJobsStorage` set in your `.env` file. This can be be found in the *Access Keys* blade of your test storage account.
+- Ensure you have `StorageAccountConnectionString` set in your `.env` file. This can be be found in the *Access Keys* blade of your test storage account.
 - Azure Function Core Tools installed https://github.com/Azure/azure-functions-core-tools
 
 **Start debugging**

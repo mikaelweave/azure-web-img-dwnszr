@@ -5,7 +5,7 @@ from src.Settings import Settings
 class SettingsTestCase:
     def test_settings_set_correctly(self):
         test_env = {}
-        test_env['AzureWebJobsStorage'] = 'test_connection_string'
+        test_env['StorageAccountConnectionString'] = 'test_connection_string'
         test_env['ImageSizes'] = '1,2,3'
 
         settings = Settings(test_env)
@@ -22,7 +22,7 @@ class SettingsTestCase:
 
     def test_settings_thow_exception_no_image_sizes(self):
         test_env = {}
-        test_env['AzureWebJobsStorage'] = 'test_connection_string'
+        test_env['StorageAccountConnectionString'] = 'test_connection_string'
 
         with pytest.raises(Exception):
             Settings(test_env)
