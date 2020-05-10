@@ -53,9 +53,9 @@ class CloudImage:
     def __image_to_stream(self, format=None):
         stream = io.BytesIO()
         if format in [None, self.extension]:
-            self.image.save(stream, format=self.extension.upper().replace('JPG', 'JPEG'))
+            self.image.save(stream, format=self.extension.upper().replace('JPG', 'JPEG'), quality=75, optimize=True)
         elif format == 'webp':
-            self.image.save(stream, format='webp', quality=70)
+            self.image.save(stream, format='webp', quality=75, optimize=True)
         else:
             raise Exception(f'Unknown format {format} provided while converting image to stream')
 
