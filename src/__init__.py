@@ -19,6 +19,7 @@ def main(event: func.EventGridEvent):
     if BlobHelpers.not_website_image(settings, container_name, blob_name): return
 
     # Load image from Azure
+    logging.info(f'Loading blob {blob_name} to CloudImage object...')
     orig_stream = BlobHelpers.read_blob_to_stream(settings, container_name, blob_name)
     cloud_image = CloudImage.CloudImage(name=blob_name, stream=orig_stream)
 
@@ -26,6 +27,7 @@ def main(event: func.EventGridEvent):
     downsize_widths = list(filter(lambda w: w <= cloud_image.width, settings.image_sizes))
 
     # Resize images (down size only)
+    logging.info(f'Resizing blob {blob_name} from {str(cloud_image.width)} to {",".join(str(x) for x in downsize_widths)}...')
     downsized_images = [copy.copy(cloud_image).downsize(width) for width in downsize_widths]
 
     # Save resized streams to Azure

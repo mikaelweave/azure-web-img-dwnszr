@@ -42,9 +42,6 @@ def save_stream_to_cloud(settings, container_name, blob_name, stream):
 
 
 def save_image_metadata(settings, image_container_name, image_blob_name, widths):
-    # if there are no resized images do nothing
-    if len(widths) == 0: return
-
     # Metadata blob structure should match image blob structure
     metadata_blob_name = 'srcsets.json'
     extension = image_blob_name.split('.')[-1]
@@ -69,8 +66,10 @@ def save_image_metadata(settings, image_container_name, image_blob_name, widths)
                 cloud_json_str = block_blob_service.get_blob_to_text(settings.metadata_container_name, metadata_blob_name).content
                 cloud_json = json.loads(cloud_json_str)
 
-                # Append metadata for our image sizes
-                cloud_json[f'{image_container_name}/{image_blob_name}'] = {extension: widths, "webp": widths}
+                # if there are no resized images, we want to record it was processed
+                cloud_json[f'{image_container_name}/{image_blob_name}'] = {}
+                if len(widths) > 0:
+                    cloud_json[f'{image_container_name}/{image_blob_name}'] = {extension: widths, "webp": widths}
 
                 # Write metadata blob
                 block_blob_service.create_blob_from_text(settings.metadata_container_name, metadata_blob_name, text=json.dumps(cloud_json), lease_id=lease_id)
