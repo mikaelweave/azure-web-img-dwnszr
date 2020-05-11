@@ -79,7 +79,7 @@ class SaveStreamToCloudTestCase:
         assert call_args.args[0] == 'container_name'
         assert call_args.args[1] == 'blob_name.jpg'
         assert call_args.kwargs['stream'] == test_stream
-        assert call_args.kwargs['content_settings'].content_type == 'image/jpg'
+        assert call_args.kwargs['content_settings'].content_type == 'image/jpg/resized'
 
     def test_catches_and_raises_exception(self, mocker):
         settings = setup_settings_for_test()

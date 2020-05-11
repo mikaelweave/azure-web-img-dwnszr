@@ -18,15 +18,20 @@ class CloudImage:
         self.image = self.__stream_to_image()
 
     def downsize(self, width):
-        if self.image.width <= int(width):
+        if self.image.width < int(width):
             return
 
         try:
+            self.name = f'{".".join(self.name.split(".")[:-1])}_{width}w.{self.extension}'
+
+            # Having the same size imaged named as a resized image is still useful in most applications
+            if self.image.width == int(width):
+                return self
+
             wpercent = (width / float(self.image.size[0]))
             hsize = int((float(self.image.size[1]) * float(wpercent)))
             self.image = self.image.resize((width, hsize), Image.ANTIALIAS)
 
-            self.name = f'{".".join(self.name.split(".")[:-1])}_{width}w.{self.extension}'
             self.stream = self.__image_to_stream()
             return self
         except Exception as ex:
