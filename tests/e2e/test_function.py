@@ -50,11 +50,9 @@ class FullE2ETestCase:
 
         # Expect our metadata file
         metadata_json = block_blob_service.get_blob_to_text(settings.metadata_container_name, 'srcsets.json')
-        metadata_json_nested = block_blob_service.get_blob_to_text(settings.metadata_container_name, 'nested/srcsets.json')
 
         # Parse JSON, check contents
         metadata = json.loads(metadata_json.content)
-        metadata_nested = json.loads(metadata_json_nested.content)
 
         # Check root metadata
         assert f'{settings.image_container_name}/test1.jpg' in metadata
@@ -64,8 +62,8 @@ class FullE2ETestCase:
         assert metadata[f'{settings.image_container_name}/test1.jpg']['webp'] == list(filter(lambda w: w <= 1000, settings.image_sizes))
 
         # Check nested metadata
-        assert f'{settings.image_container_name}/nested/test1.jpg' in metadata_nested
-        assert 'jpg' in metadata_nested[f'{settings.image_container_name}/nested/test1.jpg']
-        assert 'webp' in metadata_nested[f'{settings.image_container_name}/nested/test1.jpg']
-        assert metadata_nested[f'{settings.image_container_name}/nested/test1.jpg']['jpg'] == list(filter(lambda w: w <= 1000, settings.image_sizes))
-        assert metadata_nested[f'{settings.image_container_name}/nested/test1.jpg']['webp'] == list(filter(lambda w: w <= 1000, settings.image_sizes))
+        assert f'{settings.image_container_name}/nested/test1.jpg' in metadata
+        assert 'jpg' in metadata[f'{settings.image_container_name}/nested/test1.jpg']
+        assert 'webp' in metadata[f'{settings.image_container_name}/nested/test1.jpg']
+        assert metadata[f'{settings.image_container_name}/nested/test1.jpg']['jpg'] == list(filter(lambda w: w <= 1000, settings.image_sizes))
+        assert metadata[f'{settings.image_container_name}/nested/test1.jpg']['webp'] == list(filter(lambda w: w <= 1000, settings.image_sizes))

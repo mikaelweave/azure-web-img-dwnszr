@@ -17,7 +17,7 @@ def execute_process_report_error(command, ignore_error=False):
         if ignore_error:
             print('Ignoring error encountered while executing')
         else:
-            raise f'Error executing command. Exiting.'
+            raise 'Error executing command. Exiting.'
 
     return stdout.decode("utf-8").rstrip()
 

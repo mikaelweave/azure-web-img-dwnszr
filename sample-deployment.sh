@@ -37,8 +37,10 @@ az functionapp deployment source config-zip --name $RESOURCE_NAME \
     --src azure-web-img-dwnszr.zip
 
 # Setup settings for function
+# Resources for srcset - https://medium.com/hceverything/applying-srcset-choosing-the-right-sizes-for-responsive-images-at-different-breakpoints-a0433450a4a3
+# Iphone - https://www.paintcodeapp.com/news/ultimate-guide-to-iphone-resolutions
 az functionapp config appsettings set --name $RESOURCE_NAME \
-    --settings "ImageSizes=480,768,1200,1400,1700,2000,2436"
+    --settings "ImageSizes=320,480,640,768,828,1024,1242,1366,1440,1600,1920,2280,2560"
 az functionapp config appsettings set --name $RESOURCE_NAME \
     --settings "StorageAccountConnectionString=$(az storage account show-connection-string --name $RESOURCE_NAME --output tsv)"
 
