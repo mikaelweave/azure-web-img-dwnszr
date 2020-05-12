@@ -64,8 +64,11 @@ def settings():
     # Switch to slots once this is supported https://feedback.azure.com/forums/355860-azure-functions/suggestions/38891209-slots-for-linux-consumption-plan
     # execute_process_report_error(f'az functionapp deployment slot create --name {function_app_name} --slot {data.function_app_slot}')
 
+    # Build package to test
+    execute_process_report_error(f'mkdir -p .tmp/azure-web-img-dwnszr{rand};cp -r host.json local.settings.json .tmp/;pip install  --target=".tmp/.python_packages/lib/site-packages"  -r requirements.txt;cp -r src/* .tmp/azure-web-img-dwnszr{rand}/;cd .tmp; zip -r ../azure-web-img-dwnszr{rand}.zip .*; cd ..;rm -rf .tmp/azure-web-img-dwnszr{rand};')
+
     # Create function app deployment from local zip
-    execute_process_report_error(f'az functionapp deployment source config-zip --name {function_app_name} --resource-group {resource_group_name} --src azure-web-img-dwnszr.zip', True)
+    execute_process_report_error(f'az functionapp deployment source config-zip --name {function_app_name} --resource-group {resource_group_name} --src azure-web-img-dwnszr{rand}.zip', True)
 
     # Set function settings
     execute_process_report_error(f'az functionapp config appsettings set --name {function_app_name} --resource-group {resource_group_name} --settings "ImageSizes={",".join(map(str, settings.image_sizes))}"')

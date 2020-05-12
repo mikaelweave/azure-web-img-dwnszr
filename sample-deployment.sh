@@ -20,7 +20,7 @@ az group create -l $LOCATION -n $RESOURCE_GROUP_NAME
 az configure --defaults group=$RESOURCE_GROUP_NAME location=$LOCATION
 
 # Create Storage Account
-storage=$(az storage account create -n $RESOURCE_NAME --sku Standard_RAGRS)
+az storage account create -n $RESOURCE_NAME --sku Standard_RAGRS
 
 # Create Function
 az functionapp create --consumption-plan-location $LOCATION \
@@ -43,6 +43,8 @@ az functionapp config appsettings set --name $RESOURCE_NAME \
     --settings "ImageSizes=320,480,640,768,828,1024,1242,1366,1440,1600,1920,2280,2560"
 az functionapp config appsettings set --name $RESOURCE_NAME \
     --settings "StorageAccountConnectionString=$(az storage account show-connection-string --name $RESOURCE_NAME --output tsv)"
+az functionapp config appsettings set --name $RESOURCE_NAME \
+    --settings "FUNCTIONS_WORKER_PROCESS_COUNT=8"
 
 # Create blob trigger
 # May require preview version of the exenthub extension
@@ -56,6 +58,36 @@ az eventgrid event-subscription create \
   --included-event-types 'Microsoft.Storage.BlobCreated' \
   --advanced-filter subject StringEndsWith '.jpg' '.jpeg' 'png' \
   --advanced-filter subject StringContains '$web'
+
+# Here you should go add the 
+az resource create --resource-group "${RESOURCE_GROUP_NAME}" \
+    --location "${LOCATION}" \
+    --name "${RESOURCE_NAME}-azure-web-img-dwnszr-function" \
+    --resource-type "Microsoft.EventGrid/eventSubscriptions" \
+    --properties <<EOF
+                        {
+                            "topic": "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP_NAME/providers/Microsoft.Storage/storageAccounts/$RESOURCE_NAME",
+                            "destination": {
+                                "endpointType": "AzureFunction",
+                                "properties": {
+                                    "resourceId": "$function_id",
+                                    "maxEventsPerBatch": 16,
+                                    "preferredBatchSizeInKilobytes": 64
+                                }
+                            },
+                            "filter": {
+                                "includedEventTypes": [
+                                    "Microsoft.Storage.BlobCreated"
+                                ]
+                            },
+                            "eventDeliverySchema": "EventGridSchema",
+                            "labels": [],
+                            "retryPolicy": {
+                                "maxDeliveryAttempts": 30,
+                                "eventTimeToLiveInMinutes": 1440
+                            }
+                        }
+                    EOF
 
 # Create action group for alerts
 action_group_id=$(az monitor action-group create --action email admin $EMAIL --name EmailErrorsAzureWebImgDwnszr --output tsv --query id)
