@@ -35,7 +35,7 @@ class CloudImage:
             self.stream = self.__image_to_stream()
             return self
         except Exception as ex:
-            raise Exception('Error resizing image {blob_name} in {container_name} to width {width}', ex)
+            raise Exception(f'Error resizing image {blob_name} in {container_name} to width {width}', ex)
 
     @property
     def width(self):
