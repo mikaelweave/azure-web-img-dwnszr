@@ -13,10 +13,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set Python 3.8
-      uses: actions/setup-python@v1.2.0
+    - name: Setup Python
+      uses: actions/setup-python@v2
       with:
-        python-version: 3.8
+        python-version: '3.8'
 
     - name: Setup environment
       run: |
@@ -30,11 +30,11 @@ jobs:
 
     - name: Package function
       run: |
-        mkdir -p .tmp/azure-web-img-dwnszr
+        mkdir -p .tmp/azure_web_img_dwnszr
         cp -r host.json local.settings.json .tmp/
         pip install  --target=".tmp/.python_packages/lib/site-packages"  -r requirements.txt
-        cp -r src/* .tmp/azure-web-img-dwnszr/
-        cd .tmp; zip -r ../azure-web-img-dwnszr.zip .*; cd ..
+        cp -r azure_web_img_dwnszr/* .tmp/azure_web_img_dwnszr/
+        cd .tmp; zip -r ../azure_web_img_dwnszr.zip .*; cd ..
         rm -rf .tmp
 
     - name: Run end to end tests
