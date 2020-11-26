@@ -31,12 +31,12 @@ az functionapp create --consumption-plan-location $LOCATION \
     --os-type linux
 
 # Get latest release
-curl -s https://api.github.com/repos/mikaelweave/azure-web-img-dwnszr/releases/latest | jq '.assets[0].browser_download_url' | xargs wget -O azure-web-img-dwnszr.zip
+curl -s https://api.github.com/repos/mikaelweave/azure_web_img_dwnszr/releases/latest | jq '.assets[0].browser_download_url' | xargs wget -O azure_web_img_dwnszr.zip
 
 # Deploy function 
 # Will currently throw error but deploy successfully - https://github.com/Azure/azure-cli/issues/12513
 az functionapp deployment source config-zip --name $RESOURCE_NAME \
-    --src azure-web-img-dwnszr.zip
+    --src azure_web_img_dwnszr.zip
 
 # If you are developing locally, run this instead if lines 33-39.
 # func azure functionapp publish $FUNCTION_APP_NAME
@@ -55,7 +55,7 @@ az functionapp config appsettings set --name $FUNCTION_APP_NAME \
 function_id=$(az functionapp show --name $FUNCTION_APP_NAME --output tsv --query 'id')/functions/azure-web-img-dwnsizr
 az eventgrid event-subscription create \
   --source-resource-id $(echo $storage | jq -r '.id') \
-  --name $FUNCTION_APP_NAME-azure-web-img-dwnszr-function \
+  --name $FUNCTION_APP_NAME_azure_web_img_dwnszr_function \
   --endpoint-type azurefunction \
   --endpoint $function_id \
   --included-event-types 'Microsoft.Storage.BlobCreated' \

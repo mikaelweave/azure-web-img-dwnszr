@@ -18,12 +18,12 @@ def find_subpackages(package):
     return packages
 
 
-setuptools.setup(name="azure-web-img-dwnszr",
+setuptools.setup(name="azure_web_img_dwnszr",
     version="0.1",
     description="Azure Function image downsizer with metadata file creation for web images",
     url="",
     author="Mikael Weaver",
-    packages=find_subpackages("azure-web-img-dwnszr"),
+    packages=find_subpackages("azure_web_img_dwnszr"),
     license='MIT',
     setup_requires=['setupext_janitor'],
     cmdclass=cmd_classes,

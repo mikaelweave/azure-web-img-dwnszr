@@ -2,8 +2,8 @@ import io, pytest
 from unittest.mock import MagicMock
 from azure.common import AzureConflictHttpError
 
-from azure-web-img-dwnszr.BlobHelpers import not_website_image, read_blob_to_stream, save_stream_to_cloud, save_image_metadata
-from azure-web-img-dwnszr.Settings import Settings
+from azure_web_img_dwnszr.BlobHelpers import not_website_image, read_blob_to_stream, save_stream_to_cloud, save_image_metadata
+from azure_web_img_dwnszr.Settings import Settings
 
 
 def setup_settings_for_test():

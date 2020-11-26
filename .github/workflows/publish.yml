@@ -18,11 +18,11 @@ jobs:
 
     - name: Package function
       run: |
-        mkdir -p .tmp/azure-web-img-dwnszr
+        mkdir -p .tmp/azure_web_img_dwnszr
         cp -r host.json local.settings.json .tmp/
         pip install  --target=".tmp/.python_packages/lib/site-packages"  -r requirements.txt
-        cp -r azure-web-img-dwnszr/* .tmp/azure-web-img-dwnszr/
-        cd .tmp; zip -r ../azure-web-img-dwnszr.zip .*; cd ..
+        cp -r azure_web_img_dwnszr/* .tmp/azure_web_img_dwnszr/
+        cd .tmp; zip -r ../azure_web_img_dwnszr.zip .*; cd ..
         rm -rf .tmp
 
     - name: Upload Release Asset
@@ -32,6 +32,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./azure-web-img-dwnszr.zip
-        asset_name: azure-web-img-dwnszr-${{ github.event.release.tag_name }}.zip
+        asset_path: ./azure_web_img_dwnszr.zip
+        asset_name: azure_web_img_dwnszr-${{ github.event.release.tag_name }}.zip
         asset_content_type: application/zip
