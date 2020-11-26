@@ -1,5 +1,5 @@
 import pytest
-from src.Settings import Settings
+from azure-web-img-dwnszr.Settings import Settings
 
 
 class SettingsTestCase:

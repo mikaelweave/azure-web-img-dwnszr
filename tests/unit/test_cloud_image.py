@@ -1,7 +1,7 @@
 import io
 from PIL import Image
 
-from src.CloudImage import CloudImage
+from azure-web-img-dwnszr.CloudImage import CloudImage
 
 
 # Helper to create in memory test image
